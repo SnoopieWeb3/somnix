@@ -2,19 +2,24 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
 import path from 'path';
+
 import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
+import { NodeModulesPolyfillPlugin } from '@esbuild-plugins/node-modules-polyfill';
+import rollupNodePolyFill from 'rollup-plugin-polyfill-node';
 
 export default defineConfig({
   plugins: [react()],
   optimizeDeps: {
     esbuildOptions: {
       define: {
-        global: 'globalThis' // make global available
+        global: 'globalThis',
       },
       plugins: [
         NodeGlobalsPolyfillPlugin({
           buffer: true,
+          process: true,
         }),
+        NodeModulesPolyfillPlugin(),
       ],
     },
   },
@@ -66,9 +71,20 @@ export default defineConfig({
   build: {
     target: 'esnext',
     outDir: 'build',
+    rollupOptions: {
+      plugins: [
+        NodeGlobalsPolyfillPlugin({
+          buffer: true,
+          process: true,
+        }),
+        NodeModulesPolyfillPlugin(),
+        rollupNodePolyFill(),
+      ],
+    },
   },
   server: {
     port: 3000,
     open: true,
   },
+  base: '/'
 });
